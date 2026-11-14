@@ -2,9 +2,9 @@
 -- Как пользоваться: откройте place "Тест игрового режима" в Studio, вставьте этот
 -- код в командную строку (Command Bar), скопируйте результат (одна строка JSON)
 -- и вставьте его в website/data.js после "window.GAME_DATA = ".
--- Поля "boss" и "soon" в data.js расставлены вручную - не потеряйте их при замене:
---   boss  у мобов (Rook King, huge sphere, huge triangle),
+-- Поле "soon" в data.js расставлено вручную - не потеряйте его при замене:
 --   soon  у башни Bacon Comander (пока нет в магазине лобби).
+-- Роли мобов (bossIn / normalIn) считаются из волн автоматически.
 
 local RS = game.ReplicatedStorage
 local HttpService = game:GetService('HttpService')
@@ -75,6 +75,25 @@ for _, name in towerNames do
 	end
 end
 
+-- Роль моба по режимам: в каких волнах он босс (group.boss) и в каких - обычный моб.
+local roles = {}
+for _, modeEntry in out.modes do
+	local module = Data.Waves:FindFirstChild(modeEntry.name)
+	if module then
+		local waves = require(module)
+		for waveIndex = 1, #waves do
+			for _, group in waves[waveIndex] do
+				roles[group.name] = roles[group.name] or { bossIn = {}, normalIn = {} }
+				local bucket = group.boss and roles[group.name].bossIn or roles[group.name].normalIn
+				bucket[modeEntry.name] = bucket[modeEntry.name] or {}
+				if not table.find(bucket[modeEntry.name], waveIndex) then
+					table.insert(bucket[modeEntry.name], waveIndex)
+				end
+			end
+		end
+	end
+end
+
 local MD = require(Data.MonsterData)
 out.monsters = {}
 local monsterNames = {}
@@ -89,7 +108,15 @@ for _, name in monsterNames do
 			table.insert(minions, { name = minion.name, amount = minion.amount, interval = minion.interval })
 		end
 	end
-	table.insert(out.monsters, { name = name, health = m.health, speed = m.speed, invisible = m.invisible or nil, minions = minions })
+	-- Боссовые роли нужны для каждого моба, который где-то босс; обычные - только для таких мобов
+	-- (чтобы видно было, где он не босс). Остальным мобам роли не пишем.
+	local role = roles[name]
+	local isBossSomewhere = role and next(role.bossIn) ~= nil
+	table.insert(out.monsters, {
+		name = name, health = m.health, speed = m.speed, invisible = m.invisible or nil, minions = minions,
+		bossIn = isBossSomewhere and role.bossIn or nil,
+		normalIn = isBossSomewhere and next(role.normalIn) ~= nil and role.normalIn or nil,
+	})
 end
 
 out.startCash, out.baseHealth, out.waitBetweenWaves = 2000, 1000, 10

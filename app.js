@@ -184,22 +184,36 @@
 
 	// --- Мобы ---
 	function renderMonsters() {
+		// { Easy: [16, 19] } -> "Easy (волны 16, 19)"; в каждом режиме роль своя.
+		const byMode = (map) => Object.entries(map || {})
+			.map(([mode, waves]) => `${esc(mode)} (${waves.length > 1 ? 'волны' : 'волна'} ${waves.join(', ')})`)
+			.join('; ');
+
 		const rows = data.monsters.map((m) => {
 			const tags = [];
-			if (m.boss) tags.push('<span class="badge danger">босс</span>');
+			if (m.bossIn) tags.push('<span class="badge danger">босс</span>');
 			if (m.invisible) tags.push('<span class="badge">невидимый</span>');
 			const minions = m.minions
 				? m.minions.map((x) => `${x.amount} × ${esc(x.name)} каждые ${x.interval} с`).join(', ')
 				: '';
 			return {
-				cells: [`<b>${esc(m.name)}</b> ${tags.join('')}`, number(m.health), number(m.speed), minions || '—'],
+				cells: [
+					`<b>${esc(m.name)}</b> ${tags.join('')}`,
+					number(m.health),
+					number(m.speed),
+					m.bossIn ? byMode(m.bossIn) : '—',
+					m.normalIn ? byMode(m.normalIn) : '—',
+					minions || '—',
+				],
 			};
 		});
 		table($('monsters-table'), [
 			{ text: 'Моб' },
 			{ text: 'Здоровье', num: true },
 			{ text: 'Скорость', num: true },
-			{ text: 'Приспешники' },
+			{ text: 'Босс в режимах' },
+			{ text: 'Обычный моб в режимах' },
+			{ text: 'Приспешники босса' },
 		], rows);
 	}
 
