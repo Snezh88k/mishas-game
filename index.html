@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ru">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Tower Defense — режимы, карты и башни</title>
+	<meta name="description" content="Справочник по игре: чем отличаются режимы и карты, характеристики башен и мобов.">
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<header class="top">
+		<div class="wrap top-inner">
+			<a class="brand" href="#top">Tower Defense</a>
+			<nav>
+				<a href="#basics">Основы</a>
+				<a href="#modes">Режимы</a>
+				<a href="#maps">Карты</a>
+				<a href="#towers">Башни</a>
+				<a href="#monsters">Мобы</a>
+			</nav>
+		</div>
+	</header>
+
+	<main id="top">
+		<section class="hero">
+			<div class="wrap">
+				<h1>Справочник по игре</h1>
+				<p class="lead">Чем отличаются режимы и карты, сколько стоят и что умеют башни, с кем придётся сражаться.</p>
+			</div>
+		</section>
+
+		<section id="basics" class="wrap">
+			<h2>Основы</h2>
+			<div class="facts" id="facts"></div>
+			<ul class="plain">
+				<li>Мобы идут по путям карты к вашей базе. Дошёл моб — база теряет столько здоровья, сколько у моба оставалось. Здоровье базы кончилось — поражение.</li>
+				<li>Деньги в матче даёт урон по мобам. Башню можно продать за половину потраченного.</li>
+				<li>Когда волна вышла, до следующей — короткая пауза; её можно пропустить кнопкой.</li>
+				<li>На боссовых волнах боссы идут по своим путям, а вместе с ними выходят их приспешники.</li>
+				<li>Награда в лобби зависит от режима и от сложности карты: награда режима умножается на множитель карты.</li>
+			</ul>
+		</section>
+
+		<section id="modes" class="wrap">
+			<h2>Режимы</h2>
+			<p class="muted">Режим выбирается после выбора карты. Он определяет число волн, живучесть мобов и награду.</p>
+			<div class="table-scroll"><table id="modes-table"></table></div>
+			<div class="cards" id="modes-cards"></div>
+		</section>
+
+		<section id="maps" class="wrap">
+			<h2>Карты и сложность</h2>
+			<p class="muted">У каждой карты своя сложность. Чем выше сложность карты, тем больше множитель награды.</p>
+			<div class="cards" id="maps-cards"></div>
+		</section>
+
+		<section id="towers" class="wrap">
+			<h2>Башни</h2>
+			<div class="tabs" id="tower-tabs" role="tablist"></div>
+			<div id="tower-view"></div>
+		</section>
+
+		<section id="monsters" class="wrap">
+			<h2>Мобы</h2>
+			<p class="muted">Здоровье указано в режиме Normal. В других режимах оно умножается на множитель режима.</p>
+			<div class="table-scroll"><table id="monsters-table"></table></div>
+		</section>
+	</main>
+
+	<footer>
+		<div class="wrap">Данные сайта собраны из игровых файлов. Если баланс изменился, обновите <code>data.js</code> (см. README).</div>
+	</footer>
+
+	<script src="data.js"></script>
+	<script src="app.js"></script>
+</body>
+</html>

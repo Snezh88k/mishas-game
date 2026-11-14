@@ -1,0 +1,96 @@
+-- Выгрузка данных для сайта из игровых модулей.
+-- Как пользоваться: откройте place "Тест игрового режима" в Studio, вставьте этот
+-- код в командную строку (Command Bar), скопируйте результат (одна строка JSON)
+-- и вставьте его в website/data.js после "window.GAME_DATA = ".
+-- Поля "boss" и "soon" в data.js расставлены вручную - не потеряйте их при замене:
+--   boss  у мобов (Rook King, huge sphere, huge triangle),
+--   soon  у башни Bacon Comander (пока нет в магазине лобби).
+
+local RS = game.ReplicatedStorage
+local HttpService = game:GetService('HttpService')
+local Data = RS.Modules.Data
+local out = {}
+
+local HM = require(Data.ModeHealthMultiplier)
+local WR = require(Data.WaveReward)
+local Attempts = require(RS.Modules.Game.AttemptsModule)
+out.modes = {}
+for _, name in { 'Easy', 'Medium', 'Normal', 'Madness' } do
+	local module = Data.Waves:FindFirstChild(name)
+	local entry = { name = name }
+	if module then
+		local waves = require(module)
+		local mobs, bosses, bossNames, mobTypes = 0, 0, {}, {}
+		for _, wave in waves do
+			for _, group in wave do
+				mobs += group.amount or 0
+				mobTypes[group.name] = true
+				if group.boss then
+					bosses += 1
+					table.insert(bossNames, group.name)
+				end
+			end
+		end
+		local types = {}
+		for typeName in mobTypes do table.insert(types, typeName) end
+		table.sort(types)
+		entry.waves, entry.mobs, entry.bosses = #waves, mobs, bosses
+		entry.bossNames, entry.mobTypes = bossNames, types
+		entry.healthMultiplier = HM[name] or 1
+		entry.finalReward = WR[name] and WR[name][#waves]
+		entry.attemptsPerDay = name == 'Normal' and Attempts.MAX_ATTEMPTS or nil
+	else
+		entry.comingSoon = true
+	end
+	table.insert(out.modes, entry)
+end
+
+local CM = require(Data.ComplexityMaps)
+local CMul = require(Data.ComplexityMultiplier)
+out.complexities = {}
+for _, name in { 'Casual', 'Easy', 'Medium', 'Hard', 'Crazy', 'Extreme', 'Chaos' } do
+	table.insert(out.complexities, { name = name, multiplier = CMul[name], maps = CM[name] or {} })
+end
+
+local TD = require(RS.TowersData)
+out.towers = {}
+local towerNames = {}
+for name in TD do table.insert(towerNames, name) end
+table.sort(towerNames)
+for _, name in towerNames do
+	local tower = TD[name]
+	if not tower.reserved then
+		local levels = {}
+		for i = 1, 6 do
+			local l = tower.levels[tostring(i)]
+			if l then
+				table.insert(levels, {
+					level = i, price = l.price, damage = l.damage, range = l.range, cool = l.cool,
+					money = l.money, summon = l.summon, summonSpeed = l.summonSpeed,
+					abilityDamage = l.abilityDamage, abilityReload = l.abilityReload,
+				})
+			end
+		end
+		table.insert(out.towers, { name = name, type = tower.typeTower, limit = tower.limit, shopPrice = tower.shopPrice, levels = levels })
+	end
+end
+
+local MD = require(Data.MonsterData)
+out.monsters = {}
+local monsterNames = {}
+for name in MD do table.insert(monsterNames, name) end
+table.sort(monsterNames)
+for _, name in monsterNames do
+	local m = MD[name]
+	local minions
+	if m.minions then
+		minions = {}
+		for _, minion in m.minions do
+			table.insert(minions, { name = minion.name, amount = minion.amount, interval = minion.interval })
+		end
+	end
+	table.insert(out.monsters, { name = name, health = m.health, speed = m.speed, invisible = m.invisible or nil, minions = minions })
+end
+
+out.startCash, out.baseHealth, out.waitBetweenWaves = 2000, 1000, 10
+print(HttpService:JSONEncode(out))
