@@ -6,6 +6,7 @@
 	--line: #dfe3ee;
 	--accent: #4a5cf0;
 	--accent-soft: #e8ebff;
+	--on-accent: #ffffff;
 	--gold: #b97a00;
 	--gold-soft: #fff2d6;
 	--danger: #c43d3d;
@@ -21,6 +22,7 @@
 		--line: #2c3245;
 		--accent: #8393ff;
 		--accent-soft: #252b4a;
+		--on-accent: #10131f;
 		--gold: #f2b84b;
 		--gold-soft: #3a3019;
 		--danger: #ff7b7b;
@@ -39,6 +41,16 @@ body {
 }
 
 .wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
+
+.announce {
+	background: var(--accent);
+	color: var(--on-accent);
+	text-align: center;
+	padding: 10px 16px;
+	font-weight: 600;
+}
+.announce[hidden] { display: none; }
+.announce small { font-weight: 400; opacity: .9; margin-left: 6px; }
 
 .top {
 	position: sticky;
@@ -109,7 +121,7 @@ tr.soon td { color: var(--muted); }
 	padding: 8px 14px;
 	border-radius: 999px;
 }
-.tab[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+.tab[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 
 #tower-view > .muted { margin: 12px 0 0; }
 

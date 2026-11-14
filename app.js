@@ -217,6 +217,31 @@
 		], rows);
 	}
 
+	// --- Плашка "следующее обновление" (data.nextUpdate = "ГГГГ-ММ-ДД"); после даты скрывается ---
+	function renderAnnounce() {
+		const box = $('announce');
+		if (!data.nextUpdate) return;
+		const [year, month, day] = data.nextUpdate.split('-').map(Number);
+		const date = new Date(year, month - 1, day);
+		const today = new Date();
+		const daysLeft = Math.round((date - new Date(today.getFullYear(), today.getMonth(), today.getDate())) / 86400000);
+		if (daysLeft < 0) return;
+
+		const dateText = date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+		const left = daysLeft === 0 ? 'сегодня' : `через ${daysLeft} ${plural(daysLeft, 'день', 'дня', 'дней')}`;
+		box.innerHTML = `Следующее обновление — ${esc(dateText)}<small>(${left})</small>`;
+		box.hidden = false;
+	}
+
+	// 1 день, 2 дня, 5 дней
+	function plural(n, one, few, many) {
+		const mod10 = n % 10, mod100 = n % 100;
+		if (mod10 === 1 && mod100 !== 11) return one;
+		if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few;
+		return many;
+	}
+
+	renderAnnounce();
 	renderFacts();
 	renderModes();
 	renderMaps();
